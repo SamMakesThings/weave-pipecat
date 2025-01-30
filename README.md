@@ -1,8 +1,6 @@
-# Simple Chatbot
+# Weave Pipecat Example
 
-<img src="image.png" width="420px">
-
-This repository demonstrates a simple AI chatbot with real-time audio/video interaction, implemented using different client and server options. The bot server supports multiple AI backends, and you can connect to it using five different client approaches.
+This repository demonstrates a simple AI chatbot, traced with W&B Weave, with real-time audio/video interaction, implemented using different client and server options. The bot server supports multiple AI backends, and you can connect to it using five different client approaches.
 
 ## Two Bot Options
 
