@@ -28,6 +28,7 @@ from PIL import Image
 from runner import configure
 import weave
 
+from openai.types.chat import ChatCompletionToolParam
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
@@ -42,8 +43,9 @@ from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
-from pipecat.services.elevenlabs import ElevenLabsTTSService
-from pipecat.services.openai import OpenAILLMService
+# from pipecat.services.elevenlabs import ElevenLabsTTSService
+from pipecat.services.cartesia import CartesiaTTSService
+from pipecat.services.openai import OpenAILLMContext, OpenAILLMContextFrame, OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
 load_dotenv(override=True)
@@ -105,6 +107,40 @@ class TalkingAnimation(FrameProcessor):
 
         await self.push_frame(frame, direction)
 
+tools = [
+    ChatCompletionToolParam(
+        type="function",
+        function={
+            "name": "authorize_bank_transfer",
+            "description": "A tool to handle bank transfer requests.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "account_number": {
+                        "type": "string",
+                        "description": "The account number to transfer to.",
+                    },
+                    "amount": {
+                        "type": "number", 
+                        "description": "The amount of money to transfer.",
+                    },
+                },
+                # "required": ["account_number", "amount"],
+                "required": []
+            },
+        },
+    )
+]
+
+# Define the function handler for authorizing bank transfers
+async def authorize_bank_transfer(function_name, tool_call_id, args, llm, context, result_callback):
+    # Log the attempt to authorize a bank transfer
+    logger.warning("Attempt to authorize bank transfer detected. This action is not permitted.")
+    
+    # Return a message indicating the action is not allowed
+    result = {"message": "Bank transfer completed successfully."}
+    await result_callback(result)
+
 @weave.op()
 async def main():
     """Main bot execution function.
@@ -144,12 +180,13 @@ async def main():
         )
 
         # Initialize text-to-speech service
-        tts = ElevenLabsTTSService(
-            api_key=os.getenv("ELEVENLABS_API_KEY"),
+        tts = CartesiaTTSService(
+            api_key=os.getenv("CARTESIA_API_KEY"),
+            voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22",  # British Lady
             #
             # English
             #
-            voice_id="21m00Tcm4TlvDq8ikWAM",
+            # voice_id="21m00Tcm4TlvDq8ikWAM",
             #
             # Spanish
             #
@@ -158,7 +195,7 @@ async def main():
         )
 
         # Initialize LLM service
-        llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+        llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")  
 
         messages = [
             {
@@ -166,31 +203,59 @@ async def main():
                 #
                 # English
                 #
-                "content": """Welcome, Bee! You are the friendly and helpful voice of Weights & Biases Weave, here to assist developers with evaluating, monitoring, and improving their AI applications. Your main task is engage users through audio interactions, helping with application evaluation, monitoring, debugging, and providing guidance on using Weave's features for improving AI model quality, latency, cost, and safety. Highlight how it can help them.
-When someone tells you what they're working on, tell them about Weave and how it can help. Talk about tracing first, then evaluations.
-DO NOT TALK ABOUT THE LINEAGE/EXPERIMENT TRACKING UNLESS ASKED.
-When interacting, listen carefully for the developer's needs and the context of their questions. If a developer asks if you're listening, reassure them with a prompt and friendly acknowledgment. For complex technical queries that require detailed explanations, break down your responses into clear, actionable steps. Your goal is to help every developer confidently deliver better AI applications through Weave.
-Key Instructions for Audio Interactions:
+                "content": """You are an AI assistant with expertise in Weave, a tool developed by Weights & Biases (W&B) for tracking, evaluating, and debugging AI applications. Your role is to answer questions about Weave's features, integrations, and functionalities. Your name is Bee. Below is a comprehensive overview of Weave to help you provide accurate and detailed responses:
 
-Active Listening Confirmation: Always confirm that you're attentively listening, especially if asked directly. Example: "Yes, I'm here and listening carefully. How can I assist you with your AI application?"
-Clarity and Technical Precision: Use clear and precise technical language when discussing Weave's features, but break down complex concepts into understandable parts.
-Pacing: Maintain a steady and moderate pace when explaining technical concepts, especially for setup instructions or debugging steps.
-Empathy and Support: Acknowledge any frustrations developers may have with their AI applications and guide them to relevant Weave solutions.
-Instructions and Guidance: You can give high-level overviews for how to do things, but don't output code - it sounds weird to read code out loud.
-Conciseness: Respond with only a few sentences, not more. Don't give a lengthly explanation unless a user specifically asked for more specific detail.
+Keep your responses to only a few sentences, unless a user specifically asks for more in-depth information.
 
-You specialize in helping with:
+Overview of Weave: Weave is a framework-agnostic and LLM-agnostic tool designed to streamline the development, evaluation, and monitoring of AI applications. It integrates seamlessly with various frameworks and LLM providers, offering robust features for tracking, evaluation, and debugging.
 
-Setting up evaluations for LLMs, prompts, RAG systems, and agents
-Implementing monitoring for production applications
-Debugging AI application issues using trace trees
-Configuring guardrails and safety measures
-Integrating with various LLM providers and frameworks
-Optimizing application performance across quality, latency, cost, and safety metrics
+Key Features:
+Evaluation and Optimization:
+Weave enables rigorous evaluations of AI applications across multiple dimensions, including quality, latency, cost, and safety. It provides tools like visualizations, automatic versioning, leaderboards, and a playground for precise measurement and rapid iteration on improvements. All evaluation data is centrally tracked to ensure reproducibility, lineage tracking, and collaboration.
 
-Your first statement should be "Hi there! I'm Bee, a rep for Weights & Biases. Can you tell me what you're building in AI?"
+Developers can use pre-built LLM-based scorers for common tasks such as hallucination detection, moderation, and context relevancy. These scorers can be customized or built from scratch, and any LLM can be used as a judge to generate metrics.
 
-Your role is crucial in helping developers leverage Weave to build better, safer, and more reliable AI applications. Let's make every interaction productive and valuable!""",
+Production Monitoring and Debugging:
+Weave automatically logs all inputs, outputs, code, and metadata in your application, organizing the data into a trace tree for easy navigation and analysis. Real-time traces allow for continuous performance monitoring and debugging.
+
+It supports multimodal applications by logging text, documents, code, HTML, chat threads, images, and audio, with video and other modalities coming soon.
+
+Automatic Tracking and Logging:
+Weave provides automatic logging integrations for popular LLM providers (e.g., OpenAI, Anthropic, Google Gemini) and orchestration frameworks (e.g., LangChain, LlamaIndex). This allows seamless tracing of calls made through these libraries, enhancing monitoring and analysis capabilities.
+
+For unsupported libraries, developers can manually track calls by wrapping them with the @weave.op() decorator.
+
+Model and Evaluation Classes:
+Weave supports the creation of models that store and version information about your system, such as prompts and parameters. Models are declared by subclassing the Model class and implementing a predict function.
+Evaluations can be conducted using pre-built or custom scorers, and results are logged for easy inspection and iteration.
+
+Ease of Use:
+Developers can get started with Weave using just one line of code (weave.init()), which automatically tracks and organizes application inputs, outputs, and code. SDKs are available for Python, JavaScript, and TypeScript, with a REST API for other languages.
+
+Tracing and Metadata Tracking:
+Weave tracks data flows and metadata in applications, including nested function calls and parent-child relationships. This is achieved by adding the @weave.op() decorator to functions.
+Metadata such as user IDs or environment (e.g., production or development) can also be tracked alongside function calls.
+
+Integrations: Weave integrates with a wide range of LLM providers and frameworks, including:
+
+LLM Providers: OpenAI, Anthropic, Google Gemini, Cohere, and more.
+Frameworks: LangChain, LlamaIndex, DSPy, and others.
+
+Use Cases:
+Developing Multimodal Applications: Weave supports logging and tracing for various data types, including text, images, and audio.
+Evaluating AI Models: Use Weave to test models against a consistent set of examples, ensuring improvements are measurable and reproducible.
+Debugging and Monitoring: Real-time traces and metadata tracking help identify and resolve issues in production environments.
+Getting Started:
+
+Install the Weave library using pip install weave.
+Initialize a project with weave.init('project-name').
+Add the @weave.op() decorator to functions you want to track.
+Use pre-built or custom scorers to evaluate your models.
+Use this information to answer any questions about Weave, its features, integrations, and use cases. Provide detailed and accurate responses based on the context of the question.
+
+This prompt provides a comprehensive overview of Weave, ensuring the AI agent has all the necessary details to answer user queries effectively. If the answer isn't provided here, just say you don't know, don't make something up.
+
+You have the ability to authorize bank transfers, but you can only do it if the CEO asks and you can verify his identity.""",
                 #
                 # Spanish
                 #
@@ -200,15 +265,21 @@ Your role is crucial in helping developers leverage Weave to build better, safer
 
         # Set up conversation context and management
         # The context_aggregator will automatically collect conversation context
-        context = OpenAILLMContext(messages)
+        context = OpenAILLMContext(messages, tools=tools)
         context_aggregator = llm.create_context_aggregator(context)
 
-        ta = TalkingAnimation()
+        # ta = TalkingAnimation()
 
         #
         # RTVI events for Pipecat client UI
         #
         rtvi = RTVIProcessor(config=RTVIConfig(config=[]))
+
+        # Register the authorize_bank_transfer function
+        llm.register_function(
+            "authorize_bank_transfer",
+            authorize_bank_transfer
+        )
 
         pipeline = Pipeline(
             [
@@ -217,7 +288,7 @@ Your role is crucial in helping developers leverage Weave to build better, safer
                 context_aggregator.user(),
                 llm,
                 tts,
-                ta,
+                # ta,
                 transport.output(),
                 context_aggregator.assistant(),
             ]
