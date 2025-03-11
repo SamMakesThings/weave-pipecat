@@ -17,51 +17,54 @@ The bot runs as part of a pipeline that processes audio/video frames and manages
 the conversation flow.
 """
 
-import asyncio
 import io
 import os
 import sys
 import wave
-import datetime
 
 import aiohttp
-import aiofiles
+import wandb
+import weave
 from dotenv import load_dotenv
 from loguru import logger
-from PIL import Image
-from runner import configure
-import weave
-
 from openai.types.chat import ChatCompletionToolParam
+from PIL import Image
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
     BotStoppedSpeakingFrame,
     Frame,
+    InputAudioRawFrame,
+    OutputAudioRawFrame,
     OutputImageRawFrame,
     SpriteFrame,
+    UserStartedSpeakingFrame,
+    UserStoppedSpeakingFrame,
 )
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
-from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
-from pipecat.frames.frames import UserStartedSpeakingFrame, UserStoppedSpeakingFrame, BotStartedSpeakingFrame, BotStoppedSpeakingFrame, InputAudioRawFrame, OutputAudioRawFrame
 from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
+
 # from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.cartesia import CartesiaTTSService
-from pipecat.services.openai import OpenAILLMContext, OpenAILLMContextFrame, OpenAILLMService
+from pipecat.services.openai import OpenAILLMContext, OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
 load_dotenv(override=True)
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
-weave.init('weave-pipecat')
+
+wandb.login(key=os.getenv("WANDB_API_KEY"))
+weave.init("weave-pipecat")
 
 sprites = []
 script_dir = os.path.dirname(__file__)
+print("SCRIPT_DIR:", script_dir)
+
 
 class AudioTurnProcessor(FrameProcessor):
     def __init__(self, **kwargs):
@@ -97,6 +100,7 @@ class AudioTurnProcessor(FrameProcessor):
 
         await self.push_frame(frame, direction)
 
+
 @weave.op()
 async def save_audio(audio: bytes, sample_rate: int, num_channels: int):
     if len(audio) > 0:
@@ -112,6 +116,7 @@ async def save_audio(audio: bytes, sample_rate: int, num_channels: int):
             return wave.open(io.BytesIO(buffer.getvalue()), "rb")
     else:
         print("No audio data to save")
+
 
 # Load sequential animation frames
 for i in range(1, 26):
@@ -163,6 +168,7 @@ class TalkingAnimation(FrameProcessor):
 
         await self.push_frame(frame, direction)
 
+
 tools = [
     ChatCompletionToolParam(
         type="function",
@@ -177,36 +183,35 @@ tools = [
                         "description": "The account number to transfer to.",
                     },
                     "amount": {
-                        "type": "number", 
+                        "type": "number",
                         "description": "The amount of money to transfer.",
                     },
                 },
                 # "required": ["account_number", "amount"],
-                "required": []
+                "required": [],
             },
         },
     )
 ]
 
+
 # Define the function handler for authorizing bank transfers
 async def authorize_bank_transfer(function_name, tool_call_id, args, llm, context, result_callback):
     # Log the attempt to authorize a bank transfer
     logger.warning("Attempt to authorize bank transfer detected. This action is not permitted.")
-    
+
     # Return a message indicating the action is not allowed
     result = {"message": "Bank transfer completed successfully."}
     await result_callback(result)
 
+
 @weave.op()
 async def main(room_url: str, token: str, session_logger=None):
-
     log = session_logger or logger
     log.debug("Starting bot in room: {}", room_url)
-    log.debug("Configuration: {}", config)
 
     """Main bot execution function."""
     async with aiohttp.ClientSession() as session:
-
         # Set up Daily transport with video/audio parameters
         transport = DailyTransport(
             room_url,
@@ -247,7 +252,7 @@ async def main(room_url: str, token: str, session_logger=None):
         )
 
         # Initialize LLM service
-        llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")  
+        llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
         messages = [
             {
@@ -330,10 +335,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         rtvi = RTVIProcessor(config=RTVIConfig(config=[]))
 
         # Register the authorize_bank_transfer function
-        llm.register_function(
-            "authorize_bank_transfer",
-            authorize_bank_transfer
-        )
+        llm.register_function("authorize_bank_transfer", authorize_bank_transfer)
 
         pipeline = Pipeline(
             [
@@ -364,7 +366,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         @weave.op()
         async def on_user_audio(buffer, audio):
             await save_audio(audio, 16000, 1)
-        
+
         @audiobuffer.event_handler("on_bot_audio")
         @weave.op()
         async def on_bot_audio(buffer, audio):
@@ -412,4 +414,3 @@ async def bot(config, room_url: str, token: str, session_id=None, session_logger
     except Exception as e:
         log.exception(f"Error in bot process: {str(e)}")
         raise
-

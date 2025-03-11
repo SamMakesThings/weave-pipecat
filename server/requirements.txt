@@ -3,5 +3,6 @@ fastapi[all]
 uvicorn
 pipecat-ai[daily,elevenlabs,cartesia,deepgram,openai,silero,google]
 weave
+wandb
 aiofiles
 aiohttp
