@@ -351,7 +351,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
 
         task = PipelineTask(
             pipeline,
-            PipelineParams(
+            params=PipelineParams(
                 allow_interruptions=True,
                 enable_metrics=True,
                 enable_usage_metrics=True,
