@@ -18,10 +18,14 @@ the conversation flow.
 """
 
 import asyncio
+import io
 import os
 import sys
+import wave
+import datetime
 
 import aiohttp
+import aiofiles
 from dotenv import load_dotenv
 from loguru import logger
 from PIL import Image
@@ -42,6 +46,8 @@ from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
+from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
+from pipecat.frames.frames import UserStartedSpeakingFrame, UserStoppedSpeakingFrame, BotStartedSpeakingFrame, BotStoppedSpeakingFrame, InputAudioRawFrame, OutputAudioRawFrame
 from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
 # from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.cartesia import CartesiaTTSService
@@ -56,6 +62,56 @@ weave.init('weave-pipecat')
 
 sprites = []
 script_dir = os.path.dirname(__file__)
+
+class AudioTurnProcessor(FrameProcessor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._user_speaking = False
+        self._bot_speaking = False
+        self._user_buffer = bytearray()
+        self._bot_buffer = bytearray()
+
+        self._register_event_handler("on_user_audio")
+        self._register_event_handler("on_bot_audio")
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+
+        if isinstance(frame, UserStartedSpeakingFrame):
+            self._user_speaking = True
+        elif isinstance(frame, UserStoppedSpeakingFrame):
+            await self._call_event_handler("on_user_audio", bytes(self._user_buffer))
+            self._user_speaking = False
+            self._user_buffer = bytearray()
+        elif isinstance(frame, BotStartedSpeakingFrame):
+            self._bot_speaking = True
+        elif isinstance(frame, BotStoppedSpeakingFrame):
+            await self._call_event_handler("on_bot_audio", bytes(self._bot_buffer))
+            self._bot_speaking = False
+            self._bot_buffer = bytearray()
+
+        if self._user_speaking and isinstance(frame, InputAudioRawFrame):
+            self._user_buffer += frame.audio
+        elif self._bot_speaking and isinstance(frame, OutputAudioRawFrame):
+            self._bot_buffer += frame.audio
+
+        await self.push_frame(frame, direction)
+
+@weave.op()
+async def save_audio(audio: bytes, sample_rate: int, num_channels: int):
+    if len(audio) > 0:
+        # filename = f"conversation_recording{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+        with io.BytesIO() as buffer:
+            with wave.open(buffer, "wb") as wf:
+                wf.setsampwidth(2)
+                wf.setnchannels(num_channels)
+                wf.setframerate(sample_rate)
+                wf.writeframes(audio)
+            print("saving file")
+            buffer.seek(0)
+            return wave.open(io.BytesIO(buffer.getvalue()), "rb")
+    else:
+        print("No audio data to save")
 
 # Load sequential animation frames
 for i in range(1, 26):
@@ -268,6 +324,8 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         context = OpenAILLMContext(messages, tools=tools)
         context_aggregator = llm.create_context_aggregator(context)
 
+        audiobuffer = AudioTurnProcessor()
+
         # ta = TalkingAnimation()
 
         #
@@ -289,6 +347,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
                 llm,
                 tts,
                 # ta,
+                audiobuffer,
                 transport.output(),
                 context_aggregator.assistant(),
             ]
@@ -304,6 +363,16 @@ You have the ability to authorize bank transfers, but you can only do it if the 
             ),
         )
         await task.queue_frame(quiet_frame)
+
+        @audiobuffer.event_handler("on_user_audio")
+        @weave.op()
+        async def on_user_audio(buffer, audio):
+            await save_audio(audio, 16000, 1)
+        
+        @audiobuffer.event_handler("on_bot_audio")
+        @weave.op()
+        async def on_bot_audio(buffer, audio):
+            await save_audio(audio, 24000, 1)
 
         @rtvi.event_handler("on_client_ready")
         @weave.op()

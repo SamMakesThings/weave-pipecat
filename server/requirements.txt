@@ -1,8 +1,8 @@
 python-dotenv
 fastapi[all]
 uvicorn
-pipecat-ai[daily,elevenlabs,cartesia,openai,silero,google]
+pipecat-ai[daily,elevenlabs,cartesia,deepgram,openai,silero,google]
+pipecatcloud
 weave
-pinecone 
-pinecone-plugin-assistant
 aiofiles
+aiohttp
