@@ -1,0 +1,6 @@
+agent_name = "weave-pipecat"
+image = "psygenic/weave-pipecat:0.1"
+secret_set = "weave-pipecat-secrets"
+
+[scaling]
+  min_instances = 1

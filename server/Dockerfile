@@ -1,16 +1,7 @@
-FROM python:3.10-bullseye
+FROM dailyco/pipecat-base:latest
 
-RUN mkdir /app
-RUN mkdir /app/assets
-# RUN mkdir /app/utils
-COPY *.py /app/
-COPY requirements.txt /app/
-copy assets/* /app/assets/
-# copy utils/* /app/utils/
+COPY ./requirements.txt requirements.txt
 
-WORKDIR /app
-RUN pip3 install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-EXPOSE 7860
-
-CMD ["python3", "server.py"]
+COPY ./bot-openai-updated.py bot.py
