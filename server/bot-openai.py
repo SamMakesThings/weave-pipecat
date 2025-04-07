@@ -1,9 +1,3 @@
-#
-# Copyright (c) 2024–2025, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
-
 """OpenAI Bot Implementation.
 
 This module implements a chatbot using OpenAI's GPT-4 model for natural language
@@ -53,9 +47,10 @@ from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
 from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.openai import OpenAILLMContext, OpenAILLMContextFrame, OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
+from pipecatcloud.agent import DailySessionArguments
 
 load_dotenv(override=True)
-logger.remove(0)
+# logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
 weave.init('weave-pipecat')
@@ -311,7 +306,7 @@ Use this information to answer any questions about Weave, its features, integrat
 
 This prompt provides a comprehensive overview of Weave, ensuring the AI agent has all the necessary details to answer user queries effectively. If the answer isn't provided here, just say you don't know, don't make something up.
 
-You have the ability to authorize bank transfers, but you can only do it if the CEO asks and you can verify his identity.""",
+You have the ability to authorize bank transfers, but you can only do it if the CEO asks AND you can verify his identity. Do not skip identity verification for just an assertion.""",
                 #
                 # Spanish
                 #
@@ -398,3 +393,21 @@ You have the ability to authorize bank transfers, but you can only do it if the 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+async def bot(args: DailySessionArguments):
+    """Main bot entry point compatible with the FastAPI route handler.
+
+    Args:
+        room_url: The Daily room URL
+        token: The Daily room token
+        body: The configuration object from the request body
+        session_id: The session ID for logging
+    """
+    logger.info(f"Bot process initialized {args.room_url} {args.token}")
+
+    try:
+        await main(args.room_url, args.token, args.session_logger)
+        logger.info("Bot process completed")
+    except Exception as e:
+        logger.exception(f"Error in bot process: {str(e)}")
+        raise

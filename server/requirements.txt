@@ -2,6 +2,7 @@ python-dotenv
 fastapi[all]
 uvicorn
 pipecat-ai[daily,elevenlabs,cartesia,deepgram,openai,silero,google]
+pipecatcloud
 weave
 wandb
 aiofiles

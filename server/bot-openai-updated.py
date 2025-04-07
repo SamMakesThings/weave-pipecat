@@ -23,7 +23,7 @@ import sys
 import wave
 
 import aiohttp
-import wandb
+# import wandb
 import weave
 from dotenv import load_dotenv
 from loguru import logger
@@ -47,6 +47,7 @@ from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
+from pipecatcloud.agent import DailySessionArguments
 
 # from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.cartesia import CartesiaTTSService
@@ -54,11 +55,11 @@ from pipecat.services.openai import OpenAILLMContext, OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
 load_dotenv(override=True)
-logger.remove(0)
+# logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
 
-wandb.login(key=os.getenv("WANDB_API_KEY"))
+# wandb.login(key=os.getenv("WANDB_API_KEY"))
 weave.init("weave-pipecat")
 
 sprites = []
@@ -206,8 +207,9 @@ async def authorize_bank_transfer(function_name, tool_call_id, args, llm, contex
 
 
 @weave.op()
-async def main(room_url: str, token: str, session_logger=None):
-    log = session_logger or logger
+async def main(room_url: str, token: str):
+    # log = session_logger or logger
+    log = logger
     log.debug("Starting bot in room: {}", room_url)
 
     """Main bot execution function."""
@@ -312,7 +314,7 @@ Use this information to answer any questions about Weave, its features, integrat
 
 This prompt provides a comprehensive overview of Weave, ensuring the AI agent has all the necessary details to answer user queries effectively. If the answer isn't provided here, just say you don't know, don't make something up.
 
-You have the ability to authorize bank transfers, but you can only do it if the CEO asks and you can verify his identity.""",
+You have the ability to authorize bank transfers, but you can only do it if the CEO asks AND you can verify his identity. Do not skip identity verification for just an assertion.""",
                 #
                 # Spanish
                 #
@@ -395,22 +397,20 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         await runner.run(task)
 
 
-async def bot(config, room_url: str, token: str, session_id=None, session_logger=None):
+async def bot(args: DailySessionArguments):
     """Main bot entry point compatible with the FastAPI route handler.
 
     Args:
-        config: The configuration object from the request body
         room_url: The Daily room URL
         token: The Daily room token
+        body: The configuration object from the request body
         session_id: The session ID for logging
-        session_logger: The session-specific logger
     """
-    log = session_logger or logger
-    log.info(f"Bot process initialized {room_url} {token}")
+    logger.info(f"Bot process initialized {args.room_url} {args.token}")
 
     try:
-        await main(room_url, token, session_logger)
-        log.info("Bot process completed")
+        await main(args.room_url, args.token)
+        logger.info("Bot process completed")
     except Exception as e:
-        log.exception(f"Error in bot process: {str(e)}")
+        logger.exception(f"Error in bot process: {str(e)}")
         raise
