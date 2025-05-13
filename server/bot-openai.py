@@ -42,10 +42,10 @@ from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
 from pipecat.frames.frames import UserStartedSpeakingFrame, UserStoppedSpeakingFrame, BotStartedSpeakingFrame, BotStoppedSpeakingFrame, InputAudioRawFrame, OutputAudioRawFrame
-from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
+from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor, RTVIObserver
 # from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.cartesia import CartesiaTTSService
-from pipecat.services.openai import OpenAILLMContext, OpenAILLMContextFrame, OpenAILLMService
+from pipecat.services.openai import OpenAILLMContext, OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecatcloud.agent import DailySessionArguments
 
@@ -354,7 +354,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
                 allow_interruptions=True,
                 enable_metrics=True,
                 enable_usage_metrics=True,
-                observers=[rtvi.observer()],
+                observers=[RTVIObserver(rtvi)],
             ),
         )
         await task.queue_frame(quiet_frame)
