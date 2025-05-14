@@ -41,11 +41,10 @@ from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
-from pipecat.frames.frames import UserStartedSpeakingFrame, UserStoppedSpeakingFrame, BotStartedSpeakingFrame, BotStoppedSpeakingFrame, InputAudioRawFrame, OutputAudioRawFrame
 from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor, RTVIObserver
 # from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.cartesia import CartesiaTTSService
-from pipecat.services.openai import OpenAILLMContext, OpenAILLMService
+from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecatcloud.agent import DailySessionArguments
 
@@ -327,38 +326,29 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         await task.queue_frame(quiet_frame)
 
         @audiobuffer.event_handler("on_audio_data")
+        # @weave.op()
         async def on_audio_data(buffer, audio, sample_rate, num_channels):
             await save_audio(audio, sample_rate, num_channels, "full")
-
-        # @audiobuffer.event_handler("on_user_turn_audio_data")
-        # @weave.op()
-        # async def on_user_turn_audio_data(buffer, audio):
-        #     await save_audio(audio, 16000, 1)
         
         @audiobuffer.event_handler("on_user_turn_audio_data")
-        @weave.op()
+        # @weave.op()
         async def on_user_turn_audio_data(buffer, audio, sample_rate, num_channels):
             print("on_user_turn_audio_data")
             await save_audio(audio, sample_rate, num_channels, "user")
         
-        # @audiobuffer.event_handler("on_bot_turn_audio_data")
-        # @weave.op()
-        # async def on_bot_turn_audio_data(buffer, audio):
-        #     await save_audio(audio, 24000, 1)
-        
         @audiobuffer.event_handler("on_bot_turn_audio_data")
-        @weave.op()
+        # @weave.op()
         async def on_bot_turn_audio_data(buffer, audio, sample_rate, num_channels):
             print("on_bot_turn_audio_data")
             await save_audio(audio, sample_rate, num_channels, "bot")
 
         @rtvi.event_handler("on_client_ready")
-        @weave.op()
+        # @weave.op()
         async def on_client_ready(rtvi):
             await rtvi.set_bot_ready()
 
         @transport.event_handler("on_first_participant_joined")
-        @weave.op()
+        # @weave.op()
         async def on_first_participant_joined(transport, participant):
             await audiobuffer.start_recording()
             await transport.capture_participant_transcription(participant["id"])
