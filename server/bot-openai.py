@@ -58,42 +58,9 @@ weave.init('weave-pipecat')
 sprites = []
 script_dir = os.path.dirname(__file__)
 
-class AudioTurnProcessor(FrameProcessor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._user_speaking = False
-        self._bot_speaking = False
-        self._user_buffer = bytearray()
-        self._bot_buffer = bytearray()
-
-        self._register_event_handler("on_user_audio")
-        self._register_event_handler("on_bot_audio")
-
-    async def process_frame(self, frame: Frame, direction: FrameDirection):
-        await super().process_frame(frame, direction)
-
-        if isinstance(frame, UserStartedSpeakingFrame):
-            self._user_speaking = True
-        elif isinstance(frame, UserStoppedSpeakingFrame):
-            await self._call_event_handler("on_user_audio", bytes(self._user_buffer))
-            self._user_speaking = False
-            self._user_buffer = bytearray()
-        elif isinstance(frame, BotStartedSpeakingFrame):
-            self._bot_speaking = True
-        elif isinstance(frame, BotStoppedSpeakingFrame):
-            await self._call_event_handler("on_bot_audio", bytes(self._bot_buffer))
-            self._bot_speaking = False
-            self._bot_buffer = bytearray()
-
-        if self._user_speaking and isinstance(frame, InputAudioRawFrame):
-            self._user_buffer += frame.audio
-        elif self._bot_speaking and isinstance(frame, OutputAudioRawFrame):
-            self._bot_buffer += frame.audio
-
-        await self.push_frame(frame, direction)
 
 @weave.op()
-async def save_audio(audio: bytes, sample_rate: int, num_channels: int):
+async def save_audio(audio: bytes, sample_rate: int, num_channels: int, name: str):
     if len(audio) > 0:
         # filename = f"conversation_recording{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
         with io.BytesIO() as buffer:
@@ -319,7 +286,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         context = OpenAILLMContext(messages, tools=tools)
         context_aggregator = llm.create_context_aggregator(context)
 
-        audiobuffer = AudioTurnProcessor()
+        audiobuffer = AudioBufferProcessor(enable_turn_audio=True)
 
         # ta = TalkingAnimation()
 
@@ -359,15 +326,31 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         )
         await task.queue_frame(quiet_frame)
 
-        @audiobuffer.event_handler("on_user_audio")
-        @weave.op()
-        async def on_user_audio(buffer, audio):
-            await save_audio(audio, 16000, 1)
+        @audiobuffer.event_handler("on_audio_data")
+        async def on_audio_data(buffer, audio, sample_rate, num_channels):
+            await save_audio(audio, sample_rate, num_channels, "full")
+
+        # @audiobuffer.event_handler("on_user_turn_audio_data")
+        # @weave.op()
+        # async def on_user_turn_audio_data(buffer, audio):
+        #     await save_audio(audio, 16000, 1)
         
-        @audiobuffer.event_handler("on_bot_audio")
+        @audiobuffer.event_handler("on_user_turn_audio_data")
         @weave.op()
-        async def on_bot_audio(buffer, audio):
-            await save_audio(audio, 24000, 1)
+        async def on_user_turn_audio_data(buffer, audio, sample_rate, num_channels):
+            print("on_user_turn_audio_data")
+            await save_audio(audio, sample_rate, num_channels, "user")
+        
+        # @audiobuffer.event_handler("on_bot_turn_audio_data")
+        # @weave.op()
+        # async def on_bot_turn_audio_data(buffer, audio):
+        #     await save_audio(audio, 24000, 1)
+        
+        @audiobuffer.event_handler("on_bot_turn_audio_data")
+        @weave.op()
+        async def on_bot_turn_audio_data(buffer, audio, sample_rate, num_channels):
+            print("on_bot_turn_audio_data")
+            await save_audio(audio, sample_rate, num_channels, "bot")
 
         @rtvi.event_handler("on_client_ready")
         @weave.op()
@@ -377,6 +360,7 @@ You have the ability to authorize bank transfers, but you can only do it if the 
         @transport.event_handler("on_first_participant_joined")
         @weave.op()
         async def on_first_participant_joined(transport, participant):
+            await audiobuffer.start_recording()
             await transport.capture_participant_transcription(participant["id"])
             await task.queue_frames([context_aggregator.user().get_context_frame()])
 
