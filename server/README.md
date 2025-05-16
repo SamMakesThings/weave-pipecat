@@ -70,3 +70,28 @@ Run the server:
 ```bash
 python server.py
 ```
+
+## Deploy in Pipecat Cloud
+
+To authenticate:
+```bash
+pcc auth login
+```
+
+Build the Docker image and host it:
+```bash
+docker build --platform=linux/arm64 -t weave-pipecat:latest .
+docker tag weave-pipecat:latest psygenic/weave-pipecat:0.2
+docker push psygenic/weave-pipecat:0.2
+```
+
+Add secrets
+```bash
+pcc secrets set weave-pipecat-secrets --file .env
+```
+
+Then deploy with
+```bash
+pcc deploy
+```
+
