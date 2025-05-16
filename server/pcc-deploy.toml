@@ -3,4 +3,4 @@ image = "psygenic/weave-pipecat:0.2"
 secret_set = "weave-pipecat-secrets"
 
 [scaling]
-  min_instances = 0
+  min_agents = 0
