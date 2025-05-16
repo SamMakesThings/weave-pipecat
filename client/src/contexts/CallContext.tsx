@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useRTVIClient, useRTVIClientTransportState } from '@pipecat-ai/client-react';
 
 // Types
 export type CallStatus = 'idle' | 'connecting' | 'connected' | 'disconnecting' | 'error';
@@ -16,11 +17,12 @@ interface CallContextType extends CallState {
   toggleMic: () => void;
 }
 
-// Create context
 const CallContext = createContext<CallContextType | undefined>(undefined);
 
-// Provider component
 export function CallProvider({ children }: { children: ReactNode }) {
+  const client = useRTVIClient();
+  const transportState = useRTVIClientTransportState();
+  
   const [state, setState] = useState<CallState>({
     status: 'idle',
     isMicEnabled: true,
@@ -28,21 +30,50 @@ export function CallProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
-  // Start a call
-  // In a real app, this would connect to a voice service
+  // Update status based on transport state
+  useEffect(() => {
+    if (!client) return;
+    
+    let callStatus: CallStatus = 'idle';
+    
+    switch (transportState) {
+      case 'connecting':
+        callStatus = 'connecting';
+        break;
+      case 'connected':
+      case 'ready':
+        callStatus = 'connected';
+        break;
+      case 'disconnecting':
+        callStatus = 'disconnecting';
+        break;
+      case 'disconnected':
+        callStatus = 'idle';
+        break;
+      case 'error':
+        callStatus = 'error';
+        break;
+    }
+    
+    setState(prev => ({
+      ...prev,
+      status: callStatus,
+      isCallActive: ['connected', 'ready'].includes(transportState),
+    }));
+  }, [transportState, client]);
+
   const startCall = async () => {
-    try {
-      setState(prev => ({ ...prev, status: 'connecting' }));
-      
-      // Simulate connection delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+    if (!client) {
       setState(prev => ({
         ...prev,
-        status: 'connected',
-        isCallActive: true,
-        error: null,
+        status: 'error',
+        error: 'PipeCat client not initialized',
       }));
+      return;
+    }
+    
+    try {
+      await client.connect();
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -52,20 +83,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // End a call
   const endCall = async () => {
+    if (!client) return;
+    
     try {
-      setState(prev => ({ ...prev, status: 'disconnecting' }));
-      
-      // Simulate disconnection delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setState(prev => ({
-        ...prev,
-        status: 'idle',
-        isCallActive: false,
-        error: null,
-      }));
+      await client.disconnect();
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -76,6 +98,9 @@ export function CallProvider({ children }: { children: ReactNode }) {
   };
 
   // Toggle microphone
+  // Note: This is a placeholder that updates the state but doesn't actually
+  // control the microphone since RTVIClient doesn't expose a direct method
+  // to toggle the microphone after initialization
   const toggleMic = () => {
     setState(prev => ({ ...prev, isMicEnabled: !prev.isMicEnabled }));
   };

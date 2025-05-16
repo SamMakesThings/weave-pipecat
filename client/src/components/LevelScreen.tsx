@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLevelNavigation } from '../contexts/LevelNavigationContext';
 import { useLevelProgress } from '../contexts/LevelProgressContext';
 import { useCall } from '../contexts/CallContext';
+import { RTVIClientAudio } from '@pipecat-ai/client-react';
 
 export function LevelScreen() {
   const { currentLevelId, levels, setCurrentScreen } = useLevelNavigation();
@@ -67,6 +68,7 @@ export function LevelScreen() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <RTVIClientAudio />
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-4 text-center">
           {currentLevel.title}
