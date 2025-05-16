@@ -1,7 +1,5 @@
 #
-# Copyright (c) 2024–2025, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
+# NOTE: This is a helper server for running the bot locally. This is not used in the deployed version.
 #
 
 """RTVI Bot Server Implementation.
