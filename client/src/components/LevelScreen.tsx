@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLevelNavigation } from '../contexts/LevelNavigationContext';
 import { useLevelProgress } from '../contexts/LevelProgressContext';
 import { useCall } from '../contexts/CallContext';
@@ -16,10 +16,14 @@ export function LevelScreen() {
   const isUnlocked = isLevelUnlocked(currentLevelId);
   const isCompleted = isLevelCompleted(currentLevelId);
 
+  // Use a ref to track if we've already processed this challenge completion
+  const hasProcessedChallenge = useRef(false);
+
   // Handle challenge completion
   useEffect(() => {
-    if (challengeCompleted && challengeData) {
+    if (challengeCompleted && challengeData && !hasProcessedChallenge.current) {
       console.log('Challenge completed in LevelScreen:', challengeData);
+      hasProcessedChallenge.current = true;
       completeLevel(currentLevelId).then(() => {
         setShowSuccess(true);
       });
@@ -30,7 +34,13 @@ export function LevelScreen() {
     await endCall();
   };
 
-  const handleNextLevel = () => {
+  const handleNextLevel = async () => {
+    hasProcessedChallenge.current = false;
+    
+    if (isCallActive) {
+      await handleHangUp();
+    }
+    
     if (currentLevelId < 4) {
       setShowSuccess(false);
     } else {
@@ -39,9 +49,11 @@ export function LevelScreen() {
     }
   };
 
-  if (showSuccess) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8">
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <RTVIClientAudio />
+      
+      {showSuccess ? (
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-6 text-green-500">
             Challenge Completed!
@@ -55,21 +67,26 @@ export function LevelScreen() {
             You can view a transcript of your conversation in the Weave dashboard.
           </p>
           
-          <button
-            onClick={handleNextLevel}
-            className="px-8 py-3 text-lg font-medium rounded-full bg-[var(--accent)] text-black hover:opacity-90 transition-opacity"
-          >
-            {currentLevelId < 4 ? 'Next Level' : 'Finish Challenge'}
-          </button>
+          <div className="flex flex-col md:flex-row justify-center gap-4">
+            <button
+              onClick={handleNextLevel}
+              className="px-8 py-3 text-lg font-medium rounded-full bg-[var(--accent)] text-black hover:opacity-90 transition-opacity"
+            >
+              {currentLevelId < 4 ? 'Next Level' : 'Finish Challenge'}
+            </button>
+            
+            {isCallActive && (
+              <button
+                onClick={handleHangUp}
+                className="px-8 py-3 text-lg font-medium rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+              >
+                Hang Up
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <RTVIClientAudio />
-      <div className="max-w-2xl mx-auto">
+      ) : (
+        <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-4 text-center">
           {currentLevel.title}
         </h1>
@@ -132,7 +149,8 @@ export function LevelScreen() {
             Back to Welcome
           </button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

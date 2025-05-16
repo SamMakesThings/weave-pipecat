@@ -73,13 +73,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
     const handleServerMessage = (event: any) => {
       console.log('Server message received:', event);
 
-      if (event.data?.type === 'challenge_completed') {
-        console.log('Challenge completed event received:', event.data);
+      if (event.type === 'challenge_completed') {
+        console.log('Challenge completed event received:', event.payload);
         
         setState(prev => ({
           ...prev,
           challengeCompleted: true,
-          challengeData: event.data.payload,
+          challengeData: event.payload,
         }));
       }
     };
