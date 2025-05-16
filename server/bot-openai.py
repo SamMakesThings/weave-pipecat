@@ -21,7 +21,6 @@ import aiohttp
 from dotenv import load_dotenv
 from loguru import logger
 from PIL import Image
-from runner import configure
 import weave
 
 from openai.types.chat import ChatCompletionToolParam
@@ -54,6 +53,7 @@ weave.init('weave-pipecat')
 
 sprites = []
 script_dir = os.path.dirname(__file__)
+print("SCRIPT_DIR:", script_dir)
 
 
 @weave.op()
@@ -157,7 +157,7 @@ async def authorize_bank_transfer(function_name, tool_call_id, args, llm, contex
     await result_callback(result)
 
 @weave.op()
-async def main():
+async def main(room_url: str, token: str):
     """Main bot execution function.
 
     Sets up and runs the bot pipeline including:
@@ -167,8 +167,10 @@ async def main():
     - Animation processing
     - RTVI event handling
     """
+    log = logger
+    log.debug("Starting bot in room: {}", room_url)
+
     async with aiohttp.ClientSession() as session:
-        (room_url, token) = await configure(session)
 
         # Set up Daily transport with video/audio parameters
         transport = DailyTransport(
@@ -320,8 +322,8 @@ Send a one-sentence first message to the user to introduce yourself.""",
                 allow_interruptions=True,
                 enable_metrics=True,
                 enable_usage_metrics=True,
-                observers=[RTVIObserver(rtvi)],
             ),
+            observers=[RTVIObserver(rtvi)],
         )
         await task.queue_frame(quiet_frame)
 
@@ -380,7 +382,7 @@ async def bot(args: DailySessionArguments):
     logger.info(f"Bot process initialized {args.room_url} {args.token}")
 
     try:
-        await main(args.room_url, args.token, args.session_logger)
+        await main(args.room_url, args.token)
         logger.info("Bot process completed")
     except Exception as e:
         logger.exception(f"Error in bot process: {str(e)}")
