@@ -1,0 +1,12 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f5f5f5"/>
+  <rect x="50" y="70" width="100" height="60" fill="#f5d742" rx="5" ry="5"/>
+  <rect x="60" y="80" width="80" height="40" fill="#fff" rx="3" ry="3"/>
+  <text x="100" y="105" font-family="Arial" font-size="18" text-anchor="middle" fill="#000">Level 4</text>
+  <path d="M70,140 L70,150 L130,150 L130,140" stroke="#333" fill="none" stroke-width="2"/>
+  <rect x="80" y="140" width="40" height="10" fill="#333"/>
+  <circle cx="70" cy="60" r="5" fill="#333"/>
+  <circle cx="130" cy="60" r="5" fill="#333"/>
+  <path d="M70,60 L70,70" stroke="#333" stroke-width="2"/>
+  <path d="M130,60 L130,70" stroke="#333" stroke-width="2"/>
+</svg>

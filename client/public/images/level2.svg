@@ -1,0 +1,8 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f5f5f5"/>
+  <path d="M50,120 L70,80 L130,80 L150,120 Z" fill="#f5d742"/>
+  <rect x="60" y="100" width="80" height="20" fill="#fff"/>
+  <circle cx="70" cy="130" r="10" fill="#333"/>
+  <circle cx="130" cy="130" r="10" fill="#333"/>
+  <text x="100" y="115" font-family="Arial" font-size="24" text-anchor="middle" fill="#000">Level 2</text>
+</svg>
