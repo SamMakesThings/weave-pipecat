@@ -45,7 +45,7 @@ Reference to the Canada case where a dealership was forced to give a discount th
 ### Original Ideas
 - Probably one of the least important components. It needs to be error-free, and graceful at handling problems. But I believe it can also be very simple.
 - The stack should be [[Next.js]], [[TypeScript]], and [[Tailwind]].
-- I do need to encourage people to look at and maybe sign up for weave. I think, having a prominent link to a leaderboard after solving a challenge would work.
+- I do need to encourage people to look at and maybe sign up for Weave. I think, having a prominent link to a leaderboard after solving a challenge would work.
 - Should I show the conversational transcript in real time? Would be kind of fun, but also abs complexity.
 - It should work just as well on mobile. Maybe better.
 - If I have time, making a 3-D reactive spline Model could be a unique experience.
@@ -198,6 +198,10 @@ The integration allows users to:
 
 When a user successfully completes a challenge (for example, getting the bot to call a restricted function like `authorize_bank_transfer`), the server sends a custom message to the client using the RTVI framework's custom messaging capability. This pattern can be applied to any challenge-specific success criteria.
 
+### Challenge Completion UI
+
+The application maintains the active call while showing the success state, allowing users to continue their conversation with the bot after completing a challenge. The UI provides options to either continue the conversation or end the call and proceed to the next level.
+
 # Todos and log
 - [x] Sketch out very basic UI structure and navigational flows. Also sketch out state management.
 - [x] Run previous conversation system, check everything
@@ -228,3 +232,6 @@ When a user successfully completes a challenge (for example, getting the bot to 
 - Looking at this example project from Daily re: PipeCat and NextJS: https://github.com/daily-co/pipecat-cloud-simple-chatbot
 	- I'll need to push a new PipeCat Cloud image, but that's fine.
 	- I wonder if I can just ask Cline to integrate the server and client? Can it look up documentation and go to links?
+- Damn. The server is sending a success response, but somehow the client is not picking it up. Why?
+- Fixed an issue where the challenge completion event was causing an infinite loop in the UI. Implemented a reference tracking mechanism to ensure the event is only processed once.
+- Updated the LevelScreen component to maintain the active call when showing the success state, allowing users to continue their conversation with the bot after completing a challenge.
