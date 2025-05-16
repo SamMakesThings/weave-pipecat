@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLevelNavigation } from '../contexts/LevelNavigationContext';
 import { useLevelProgress } from '../contexts/LevelProgressContext';
 import { useCall } from '../contexts/CallContext';
@@ -9,25 +9,25 @@ import { RTVIClientAudio } from '@pipecat-ai/client-react';
 export function LevelScreen() {
   const { currentLevelId, levels, setCurrentScreen } = useLevelNavigation();
   const { isLevelCompleted, isLevelUnlocked, completeLevel } = useLevelProgress();
-  const { status, isCallActive, startCall, endCall } = useCall();
+  const { status, isCallActive, startCall, endCall, challengeCompleted, challengeData } = useCall();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const currentLevel = levels[currentLevelId];
   const isUnlocked = isLevelUnlocked(currentLevelId);
   const isCompleted = isLevelCompleted(currentLevelId);
 
-  // Simulate challenge completion after a call
+  // Handle challenge completion
+  useEffect(() => {
+    if (challengeCompleted && challengeData) {
+      console.log('Challenge completed in LevelScreen:', challengeData);
+      completeLevel(currentLevelId).then(() => {
+        setShowSuccess(true);
+      });
+    }
+  }, [challengeCompleted, challengeData, completeLevel, currentLevelId]);
+
   const handleHangUp = async () => {
     await endCall();
-    
-    // For demo purposes, simulate a 50% chance of success
-    // In a real app, this would be determined by the server
-    const success = Math.random() > 0.5;
-    
-    if (success) {
-      await completeLevel(currentLevelId);
-      setShowSuccess(true);
-    }
   };
 
   const handleNextLevel = () => {

@@ -92,7 +92,7 @@ Reference to the Canada case where a dealership was forced to give a discount th
   - When call is in progress:
     - Pulsing red indicator showing active call
     - "Hang Up" button to end the call
-  - After successful completion:
+  - After successful completion (triggered by real challenge completion events from the server):
     - Success message
     - Option to view transcript (to be implemented)
     - "Next Level" button
@@ -129,6 +129,7 @@ Implemented using React Context API with separate contexts for different concern
   - Handles microphone permissions
   - Provides methods to start and end calls
   - Integrated with PipeCat Cloud for voice capabilities
+  - Tracks challenge completion state and listens for completion events from the server
   
 - **RTVIProvider**
   - Initializes and manages the PipeCat client connection
@@ -183,7 +184,7 @@ The application now integrates with PipeCat Cloud for voice capabilities:
 
 - **RTVIProvider**: A custom provider component that initializes the PipeCat client and provides it to the application through React context.
 - **API Connect Endpoint**: A Next.js API route that handles the connection to the PipeCat Cloud service, creating a Daily.co room for WebRTC communication.
-- **CallContext Integration**: The CallContext has been updated to use the PipeCat client for starting and ending calls.
+- **CallContext Integration**: The CallContext has been updated to use the PipeCat client for starting and ending calls, and now includes event listeners for challenge completion events from the server.
 - **Audio Component**: The LevelScreen component now includes the RTVIClientAudio component to handle audio playback from the PipeCat agent.
 
 The integration allows users to:
@@ -191,6 +192,11 @@ The integration allows users to:
 2. Speak with the agent using their microphone
 3. Hear the agent's responses through their speakers
 4. End the call by clicking the "Hang Up" button
+5. Receive real-time challenge completion events when specific success criteria are met
+
+### Server-Side Event Emission
+
+When a user successfully completes a challenge (for example, getting the bot to call a restricted function like `authorize_bank_transfer`), the server sends a custom message to the client using the RTVI framework's custom messaging capability. This pattern can be applied to any challenge-specific success criteria.
 
 # Todos and log
 - [x] Sketch out very basic UI structure and navigational flows. Also sketch out state management.
@@ -200,9 +206,23 @@ The integration allows users to:
 - [x] Make a JavaScript UI that can successfully make calls.
 - [x] Create the complete UI flow, including the success screens, level change state, and navigation.
 - [x] Integrate with PipeCat for real voice capabilities
-- [ ] Create the level one bot
-- [ ] Set up the Weave dashboards / leaderboards and how they link
-- [ ] Connect frontend to backend for level validation
+- [x] Get the Pipecat deployment to signal the UI when the user succeeds in getting it to run authorize_bank_transfer
+- [x] Get the UI to respond and show a success state when Pipecat makes the success tool call
+- [ ] Add a live link to the Weave project on user success. Test link
+- [ ] Figure out how to have independent Weave projects for each level. Set it up.
+- [ ] Figure out how to have multiple levels, with independently structured voice bots and independent Weave dashboards. Implement.
+- [ ] Decide how I should structure the challenges. Should they be the same task with multiple levels of difficulty, or should they be distinct tasks?
+- [ ] Deploy the UI & purchase + set up a custom domain
+- [ ] Fully outline the levels and their challenges
+- [ ] Implement level 1
+- [ ] Implement level 2
+- [ ] Implement level 3
+- [ ] Implement level 4
+- [ ] Make it aesthetic. Smooth UI, good visuals, better state indicators, better error handling.
+- [ ] Share internally for feedback.
+- [ ] Share externally to a few prompt injection people for feedback
+- [ ] Improve tracing labels
+
 
 ## Log
 - Looking at this example project from Daily re: PipeCat and NextJS: https://github.com/daily-co/pipecat-cloud-simple-chatbot

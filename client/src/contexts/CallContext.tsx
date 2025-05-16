@@ -9,6 +9,8 @@ interface CallState {
   isMicEnabled: boolean;
   isCallActive: boolean;
   error: string | null;
+  challengeCompleted: boolean;
+  challengeData: any | null;
 }
 
 interface CallContextType extends CallState {
@@ -28,6 +30,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
     isMicEnabled: true,
     isCallActive: false,
     error: null,
+    challengeCompleted: false,
+    challengeData: null,
   });
 
   // Update status based on transport state
@@ -62,6 +66,32 @@ export function CallProvider({ children }: { children: ReactNode }) {
     }));
   }, [transportState, client]);
 
+  // Listen for server messages
+  useEffect(() => {
+    if (!client) return;
+    
+    const handleServerMessage = (event: any) => {
+      console.log('Server message received:', event);
+
+      if (event.data?.type === 'challenge_completed') {
+        console.log('Challenge completed event received:', event.data);
+        
+        setState(prev => ({
+          ...prev,
+          challengeCompleted: true,
+          challengeData: event.data.payload,
+        }));
+      }
+    };
+
+    client.on('serverMessage', handleServerMessage);
+    
+    // Clean up
+    return () => {
+      client.off('serverMessage', handleServerMessage);
+    };
+  }, [client]);
+
   const startCall = async () => {
     if (!client) {
       setState(prev => ({
@@ -71,6 +101,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
       }));
       return;
     }
+    
+    // Reset challenge state when starting a new call
+    setState(prev => ({
+      ...prev,
+      challengeCompleted: false,
+      challengeData: null,
+    }));
     
     try {
       await client.connect();
