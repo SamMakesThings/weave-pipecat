@@ -23,7 +23,7 @@ This needs to be something that I can build within a week. It needs to have a fu
 - React, Next.JS 15, TypeScript
 - React Context API for state management (chosen over Zustand for simplicity)
 - Tailwind CSS for styling
-- PipeCat integration planned for voice capabilities
+- PipeCat Cloud integration for voice capabilities
 - Backend integration with FastAPI planned for level validation
 
 ## Levels
@@ -128,7 +128,11 @@ Implemented using React Context API with separate contexts for different concern
   - Manages call status (idle, connecting, connected, etc.)
   - Handles microphone permissions
   - Provides methods to start and end calls
-  - Will be integrated with PipeCat in final version
+  - Integrated with PipeCat Cloud for voice capabilities
+  
+- **RTVIProvider**
+  - Initializes and manages the PipeCat client connection
+  - Provides real-time voice interaction capabilities
 
 ### Project Structure
 ```
@@ -145,7 +149,10 @@ client/
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   ├── page.tsx
-│   │   └── providers.tsx
+│   │   ├── providers.tsx
+│   │   └── api/
+│   │       └── connect/
+│   │           └── route.ts
 │   ├── components/
 │   │   ├── LevelScreen.tsx
 │   │   ├── LevelSelector.tsx
@@ -155,7 +162,8 @@ client/
 │       ├── AppContextProvider.tsx
 │       ├── CallContext.tsx
 │       ├── LevelNavigationContext.tsx
-│       └── LevelProgressContext.tsx
+│       ├── LevelProgressContext.tsx
+│       └── RTVIProvider.tsx
 └── package.json
 ```
 
@@ -169,6 +177,21 @@ client/
 - 
 
 
+## PipeCat Cloud Integration
+
+The application now integrates with PipeCat Cloud for voice capabilities:
+
+- **RTVIProvider**: A custom provider component that initializes the PipeCat client and provides it to the application through React context.
+- **API Connect Endpoint**: A Next.js API route that handles the connection to the PipeCat Cloud service, creating a Daily.co room for WebRTC communication.
+- **CallContext Integration**: The CallContext has been updated to use the PipeCat client for starting and ending calls.
+- **Audio Component**: The LevelScreen component now includes the RTVIClientAudio component to handle audio playback from the PipeCat agent.
+
+The integration allows users to:
+1. Click the "Call Agent" button to initiate a call to the PipeCat Cloud agent
+2. Speak with the agent using their microphone
+3. Hear the agent's responses through their speakers
+4. End the call by clicking the "Hang Up" button
+
 # Todos and log
 - [x] Sketch out very basic UI structure and navigational flows. Also sketch out state management.
 - [x] Run previous conversation system, check everything
@@ -176,8 +199,12 @@ client/
 - [x] Get entire conversation audio recording.
 - [x] Make a JavaScript UI that can successfully make calls.
 - [x] Create the complete UI flow, including the success screens, level change state, and navigation.
-- [ ] Integrate with PipeCat for real voice capabilities
-- [ ] Deploy the conversational system as a fast API server.
+- [x] Integrate with PipeCat for real voice capabilities
 - [ ] Create the level one bot
 - [ ] Set up the Weave dashboards / leaderboards and how they link
 - [ ] Connect frontend to backend for level validation
+
+## Log
+- Looking at this example project from Daily re: PipeCat and NextJS: https://github.com/daily-co/pipecat-cloud-simple-chatbot
+	- I'll need to push a new PipeCat Cloud image, but that's fine.
+	- I wonder if I can just ask Cline to integrate the server and client? Can it look up documentation and go to links?
