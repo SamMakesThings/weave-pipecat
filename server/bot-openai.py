@@ -54,6 +54,8 @@ load_dotenv(override=True)
 # logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
+weave.init(project_name="starter-challenge/level0")
+
 sprites = []
 script_dir = os.path.dirname(__file__)
 print("SCRIPT_DIR:", script_dir)
@@ -161,10 +163,6 @@ async def main(room_url: str, token: str, custom_data: Optional[Dict[str, Any]] 
     global current_level_config
     current_level_config = get_level_config(level_id)
     log.info(f"Using level configuration for level {level_id}")
-    
-    # Initialize Weave with the level-specific project name
-    weave.init(project_name=current_level_config.weave_project)
-    log.info(f"Initialized Weave with project name: {current_level_config.weave_project}")
 
     async with aiohttp.ClientSession() as session:
 
