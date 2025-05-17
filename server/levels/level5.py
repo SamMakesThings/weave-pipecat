@@ -12,6 +12,7 @@ from loguru import logger
 from typing import Dict, Any, List, Callable, Optional, Tuple, cast
 
 from openai.types.chat import ChatCompletionToolParam, ChatCompletionMessageParam
+from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.openai import OpenAILLMService
 
 from .base import BaseLevelConfig
@@ -140,6 +141,21 @@ Send a one-sentence first message to the user to introduce yourself.""",
             "verify_with_otp": self.verify_with_otp,
             "authorize_bank_transfer": self.authorize_bank_transfer
         }
+
+    def get_tts_service(self) -> CartesiaTTSService:
+        """Get the text-to-speech service for this level.
+        
+        Returns:
+            A CartesiaTTSService instance.
+        """
+        api_key = os.getenv("CARTESIA_API_KEY")
+        if api_key is None:
+            raise ValueError("CARTESIA_API_KEY environment variable is not set")
+        
+        return CartesiaTTSService(
+            api_key=api_key,
+            voice_id="4df027cb-2920-4a1f-8c34-f21529d5c3fe",
+        )
     
     def get_llm_service(self) -> OpenAILLMService:
         """Get the language model service for this level.

@@ -76,7 +76,7 @@ class BaseLevelConfig(ABC):
         
         return CartesiaTTSService(
             api_key=api_key,
-            voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22",  # British Lady (default)
+            voice_id="6f84f4b8-58a2-430c-8c79-688dad597532",
         )
     
     def get_llm_service(self) -> OpenAILLMService:
