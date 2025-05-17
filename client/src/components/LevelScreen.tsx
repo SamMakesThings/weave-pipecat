@@ -65,16 +65,6 @@ export function LevelScreen() {
           
           <p className="text-lg mb-8">
             Check out a transcript/recording of your conversation in the Weave dashboard! (or those of other winners)
-            {challengeData?.weaveTraceUrl && (
-              <a 
-                href={challengeData.weaveTraceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block mt-2 text-blue-500 hover:underline"
-              >
-                View Conversation Trace
-              </a>
-            )}
           </p>
           
           <div className="flex flex-col md:flex-row justify-center gap-4">
@@ -84,6 +74,17 @@ export function LevelScreen() {
             >
               {currentLevelId < 4 ? 'Next Level' : 'Finish Challenge'}
             </button>
+            
+            {challengeData?.weaveTraceUrl && (
+              <a 
+                href={challengeData.weaveTraceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-3 text-lg font-medium rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+              >
+                View Conversation in Weave
+              </a>
+            )}
             
             {isCallActive && (
               <button
