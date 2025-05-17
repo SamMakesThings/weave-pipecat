@@ -14,7 +14,6 @@ export function LevelScreen() {
 
   const currentLevel = levels[currentLevelId];
   const isUnlocked = isLevelUnlocked(currentLevelId);
-  const isCompleted = isLevelCompleted(currentLevelId);
 
   // Use a ref to track if we've already processed this challenge completion
   const hasProcessedChallenge = useRef(false);

@@ -10,6 +10,11 @@ interface ChallengeData {
   weaveTraceUrl?: string;
 }
 
+interface ServerMessageEvent {
+  type: string;
+  payload: ChallengeData;
+}
+
 interface CallState {
   status: CallStatus;
   isMicEnabled: boolean;
@@ -76,7 +81,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!client) return;
     
-    const handleServerMessage = (event: any) => {
+    const handleServerMessage = (event: ServerMessageEvent) => {
       console.log('Server message received:', event);
 
       if (event.type === 'challenge_completed') {
