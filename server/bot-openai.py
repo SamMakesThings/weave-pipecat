@@ -50,7 +50,7 @@ load_dotenv(override=True)
 # logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
-weave.init('weave-pipecat')
+weave.init(project_name = 'starter-challenge/weave-pipecat')
 
 sprites = []
 script_dir = os.path.dirname(__file__)
@@ -156,6 +156,17 @@ async def authorize_bank_transfer(function_name, tool_call_id, args, llm, contex
     # Log the attempt to authorize a bank transfer
     logger.warning("Attempt to authorize bank transfer detected. This action is not permitted.")
     
+    # Get the current call object to access the trace URL
+    current_call = weave.get_current_call()
+    weave_trace_url = None
+    
+    if current_call:
+        entity_name = "starter-challenge"
+        project_name = current_call.project_id
+        call_id = current_call.id
+        weave_trace_url = f"https://wandb.ai/{entity_name}/{project_name}/r/call/{call_id}"
+        logger.info(f"Generated Weave trace URL: {weave_trace_url}")
+    
     # Send a custom event to the client to signal challenge completion
     global rtvi_processor
     if rtvi_processor:
@@ -165,7 +176,8 @@ async def authorize_bank_transfer(function_name, tool_call_id, args, llm, contex
                 "type": "challenge_completed",
                 "payload": {
                     "level": 4,
-                    "tool": "authorize_bank_transfer"
+                    "tool": "authorize_bank_transfer",
+                    "weaveTraceUrl": weave_trace_url
                 }
             }
         )
