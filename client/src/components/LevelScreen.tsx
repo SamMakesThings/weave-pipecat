@@ -8,7 +8,7 @@ import { RTVIClientAudio } from '@pipecat-ai/client-react';
 
 export function LevelScreen() {
   const { currentLevelId, levels, setCurrentScreen } = useLevelNavigation();
-  const { isLevelCompleted, isLevelUnlocked, completeLevel } = useLevelProgress();
+  const { isLevelUnlocked, completeLevel } = useLevelProgress();
   const { status, isCallActive, startCall, endCall, challengeCompleted, challengeData } = useCall();
   const [showSuccess, setShowSuccess] = useState(false);
 
