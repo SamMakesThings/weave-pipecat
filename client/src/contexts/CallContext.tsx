@@ -28,6 +28,7 @@ interface CallContextType extends CallState {
   startCall: () => Promise<void>;
   endCall: () => Promise<void>;
   toggleMic: () => void;
+  resetChallengeState: () => void;
 }
 
 const CallContext = createContext<CallContextType | undefined>(undefined);
@@ -153,11 +154,21 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, isMicEnabled: !prev.isMicEnabled }));
   };
 
+  // Reset challenge state
+  const resetChallengeState = () => {
+    setState(prev => ({
+      ...prev,
+      challengeCompleted: false,
+      challengeData: null,
+    }));
+  };
+
   const value = {
     ...state,
     startCall,
     endCall,
     toggleMic,
+    resetChallengeState,
   };
 
   return (

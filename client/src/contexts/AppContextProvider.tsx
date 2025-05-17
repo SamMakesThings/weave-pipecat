@@ -10,14 +10,14 @@ interface AppContextProviderProps {
 
 export function AppContextProvider({ children }: AppContextProviderProps) {
   return (
-    <RTVIProvider>
-      <LevelNavigationProvider>
-        <LevelProgressProvider>
+    <LevelNavigationProvider>
+      <LevelProgressProvider>
+        <RTVIProvider>
           <CallProvider>
             {children}
           </CallProvider>
-        </LevelProgressProvider>
-      </LevelNavigationProvider>
-    </RTVIProvider>
+        </RTVIProvider>
+      </LevelProgressProvider>
+    </LevelNavigationProvider>
   );
 }

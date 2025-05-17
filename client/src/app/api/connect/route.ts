@@ -4,6 +4,8 @@ export async function POST(request: NextRequest) {
   try {
     const { customData } = await request.json();
 
+    console.log('Connecting to PipeCat Cloud with level:', customData?.level);
+
     const response = await fetch(
       `https://api.pipecat.daily.co/v1/public/${process.env.AGENT_NAME}/start`,
       {
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
           createDailyRoom: true,
           // Optionally set Daily room properties
           dailyRoomProperties: { start_video_off: true },
-          // Optionally pass custom data to the bot
+          // Pass custom data to the bot, including the level ID
           body: { customData },
         }),
       }

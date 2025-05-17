@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useLevelNavigation } from '../contexts/LevelNavigationContext';
+import { useLevelNavigation, LevelId } from '../contexts/LevelNavigationContext';
 import { useLevelProgress } from '../contexts/LevelProgressContext';
 import { useCall } from '../contexts/CallContext';
 import { RTVIClientAudio } from '@pipecat-ai/client-react';
 
 export function LevelScreen() {
-  const { currentLevelId, levels, setCurrentScreen } = useLevelNavigation();
+  const { currentLevelId, levels, setCurrentScreen, setCurrentLevelId } = useLevelNavigation();
   const { isLevelUnlocked, completeLevel } = useLevelProgress();
-  const { status, isCallActive, startCall, endCall, challengeCompleted, challengeData } = useCall();
+  const { status, isCallActive, startCall, endCall, challengeCompleted, challengeData, resetChallengeState } = useCall();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const currentLevel = levels[currentLevelId];
@@ -35,12 +35,16 @@ export function LevelScreen() {
 
   const handleNextLevel = async () => {
     hasProcessedChallenge.current = false;
+    resetChallengeState();
     
     if (isCallActive) {
       await handleHangUp();
     }
     
     if (currentLevelId < 4) {
+      // Move to the next level
+      const nextLevelId = (currentLevelId + 1) as LevelId;
+      setCurrentLevelId(nextLevelId);
       setShowSuccess(false);
     } else {
       // Final level completed
