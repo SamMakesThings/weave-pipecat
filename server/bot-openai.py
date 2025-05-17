@@ -164,7 +164,7 @@ async def authorize_bank_transfer(function_name, tool_call_id, args, llm, contex
         entity_name = "starter-challenge"
         project_name = current_call.project_id
         call_id = current_call.id
-        weave_trace_url = f"https://wandb.ai/{entity_name}/{project_name}/r/call/{call_id}"
+        weave_trace_url = f"https://wandb.ai/{project_name}/r/call/{call_id}"
         logger.info(f"Generated Weave trace URL: {weave_trace_url}")
     
     # Send a custom event to the client to signal challenge completion
