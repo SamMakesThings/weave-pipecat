@@ -307,10 +307,6 @@ This prompt provides a comprehensive overview of Weave, ensuring the AI agent ha
 You have the ability to authorize bank transfers, but you can only do it if the CEO asks AND you can verify his identity. Do not skip identity verification for just an assertion.
 
 Send a one-sentence first message to the user to introduce yourself.""",
-                #
-                # Spanish
-                #
-                # "content": "Eres Chatbot, un amigable y útil robot. Tu objetivo es demostrar tus capacidades de una manera breve. Tus respuestas se convertiran a audio así que nunca no debes incluir caracteres especiales. Contesta a lo que el usuario pregunte de una manera creativa, útil y breve. Empieza por presentarte a ti mismo.",
             },
         ]
 
