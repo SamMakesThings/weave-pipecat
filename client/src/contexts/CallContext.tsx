@@ -4,13 +4,19 @@ import { useRTVIClient, useRTVIClientTransportState } from '@pipecat-ai/client-r
 // Types
 export type CallStatus = 'idle' | 'connecting' | 'connected' | 'disconnecting' | 'error';
 
+interface ChallengeData {
+  level: number;
+  tool: string;
+  weaveTraceUrl?: string;
+}
+
 interface CallState {
   status: CallStatus;
   isMicEnabled: boolean;
   isCallActive: boolean;
   error: string | null;
   challengeCompleted: boolean;
-  challengeData: any | null;
+  challengeData: ChallengeData | null;
 }
 
 interface CallContextType extends CallState {

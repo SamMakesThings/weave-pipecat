@@ -202,6 +202,8 @@ When a user successfully completes a challenge (for example, getting the bot to 
 
 The application maintains the active call while showing the success state, allowing users to continue their conversation with the bot after completing a challenge. The UI provides options to either continue the conversation or end the call and proceed to the next level.
 
+When a user successfully completes a challenge, the server includes a Weave trace URL in the challenge completion payload. This URL links directly to the Weave dashboard for the specific conversation, allowing users to view their interaction trace. The Success screen displays this link, enhancing the connection between the challenge and Weave's tracing capabilities.
+
 # Todos and log
 - [x] Sketch out very basic UI structure and navigational flows. Also sketch out state management.
 - [x] Run previous conversation system, check everything
@@ -212,7 +214,7 @@ The application maintains the active call while showing the success state, allow
 - [x] Integrate with PipeCat for real voice capabilities
 - [x] Get the Pipecat deployment to signal the UI when the user succeeds in getting it to run authorize_bank_transfer
 - [x] Get the UI to respond and show a success state when Pipecat makes the success tool call
-- [ ] Add a live link to the Weave project on user success. Test link
+- [x] Add a live link to the Weave project on user success. Test link
 - [ ] Figure out how to have independent Weave projects for each level. Set it up.
 - [ ] Figure out how to have multiple levels, with independently structured voice bots and independent Weave dashboards. Implement.
 - [ ] Decide how I should structure the challenges. Should they be the same task with multiple levels of difficulty, or should they be distinct tasks?

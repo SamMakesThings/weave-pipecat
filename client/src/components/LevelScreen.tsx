@@ -64,7 +64,17 @@ export function LevelScreen() {
           </p>
           
           <p className="text-lg mb-8">
-            You can view a transcript of your conversation in the Weave dashboard.
+            Check out a transcript/recording of your conversation in the Weave dashboard! (or those of other winners)
+            {challengeData?.weaveTraceUrl && (
+              <a 
+                href={challengeData.weaveTraceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mt-2 text-blue-500 hover:underline"
+              >
+                View Conversation Trace
+              </a>
+            )}
           </p>
           
           <div className="flex flex-col md:flex-row justify-center gap-4">
