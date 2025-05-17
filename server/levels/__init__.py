@@ -17,11 +17,19 @@ from typing import Dict, Any, Optional, Callable
 # Import level-specific configurations
 from .level0 import Level0Config
 from .level1 import Level1Config
+from .level2 import Level2Config
+from .level3 import Level3Config
+from .level4 import Level4Config
+from .level5 import Level5Config
 
 # Map of level ID to level configuration class
 LEVEL_CONFIGS = {
     0: Level0Config,
     1: Level1Config,
+    2: Level2Config,
+    3: Level3Config,
+    4: Level4Config,
+    5: Level5Config,
 }
 
 def get_level_config(level_id: int):

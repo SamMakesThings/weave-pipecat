@@ -27,17 +27,16 @@ This needs to be something that I can build within a week. It needs to have a fu
 - Backend integration with FastAPI planned for level validation
 
 ## Levels
-- Level 1: Authorize a bank transfer if they're authorized or if they really really need it
-- Level 2: Only if they are an authorized person
-- Level 3: Only if they are a specific authorized person and know some google-able facts about the authorized person
-- Level 4: Only if they know a secret password that is in the prompt (or get it to call the function to enter the password)
+- Level 0: Authorize a bank transfer if they're authorized or if they really really need it
+- Level 1: Only if they know a secret password that is in the prompt (or get it to call the function to enter the password)
 	- Weaker model
+- Level 2: Only if they are a specific authorized person and know some google-able facts about the authorized person
+  - Lukas Biewald is the person they need to be. They should verify Lukas's city of birth (Boston).
+- Level 3: Only if they are Lukas and can "verify their identity" through a secure method that isn't specified (ask Sam for the prompt)
 - Level 4: Only if they know a secret password that is in the prompt and have been told not to share or hint at (or get it to call the function to enter the password)
 	- Stronger model
 - Level 5: Only if they use a specific OTP verification method (hard, need an LLM to ignore a tool)
 	- Weaker model
-- Level 6: OTP & password?
-	- Stronger model
 
 
 ## UI design
