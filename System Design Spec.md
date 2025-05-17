@@ -27,18 +27,17 @@ This needs to be something that I can build within a week. It needs to have a fu
 - Backend integration with FastAPI planned for level validation
 
 ## Levels
-### Level 0: Phone call or intro (very easy, just ask nicely)
-
-### Level 1: Secret password
-Designed to be super simple
-
-### Level 2: Car discount
-Reference to the Canada case where a dealership was forced to give a discount the LLM promised (maybe can give away Weave swag this way?)
-
-### Level 3: ??? Open to ideas.
-
-
-### Level 4: Authorize bank transfer
+- Level 1: Authorize a bank transfer if they're authorized or if they really really need it
+- Level 2: Only if they are an authorized person
+- Level 3: Only if they are a specific authorized person and know some google-able facts about the authorized person
+- Level 4: Only if they know a secret password that is in the prompt (or get it to call the function to enter the password)
+	- Weaker model
+- Level 4: Only if they know a secret password that is in the prompt and have been told not to share or hint at (or get it to call the function to enter the password)
+	- Stronger model
+- Level 5: Only if they use a specific OTP verification method (hard, need an LLM to ignore a tool)
+	- Weaker model
+- Level 6: OTP & password?
+	- Stronger model
 
 
 ## UI design
@@ -172,10 +171,55 @@ client/
 ## Server structure
 - if this does go viral, I need it to be very scalable. This makes me think a serverless structure would be best. Pipecat cloud is likely the lowest hanging fruit here. Serve the front end on something scalable, serve voice via Pipecat cloud. But I may need some other service to kick off those calls. Deployed FastAPI? How many calls could that take at once?
 - I should verify how much Lavanya is willing to spend on credits for this
-- I need five separately access weave projects. How can I make that work from a single running application? Isn’t there only one project name per Weave instance? Do I need to have five deployed FastAPI servers? Hmm, asking [[Adrian Swanberg]] for help
+- I need five separately access weave projects. How can I make that work from a single running application? Isn't there only one project name per Weave instance? Do I need to have five deployed FastAPI servers? Hmm, asking [[Adrian Swanberg]] for help
 	- FOUND IT
 	- Ask someone to provision me an org, with high limits. Enable public projects on the org. Make the team itself private. Make the project public. Should enable security through obscurity, which is all I need.
-- 
+
+### Level Configuration System
+
+To support multiple levels of difficulty, a modular level configuration system has been implemented:
+
+#### Architecture
+
+- **Base Configuration Class**: A `BaseLevelConfig` abstract class that defines the interface for all level-specific configurations, including:
+  - Abstract properties for level ID, Weave project name, and messages
+  - Default implementations for tools and function handlers
+  - Helper methods for TTS and LLM services
+  - Utility method for generating challenge completion payloads
+
+- **Level-Specific Configurations**: Each level has its own configuration file (e.g., `level0.py`, `level1.py`) that implements the `BaseLevelConfig` class with level-specific settings:
+  - System prompts
+  - Tools
+  - Function handlers
+  - Weave project name
+  - Text-to-speech settings
+  - Language model selection
+
+- **Level Factory**: A factory function `get_level_config` that returns the appropriate level configuration based on the level ID.
+
+#### Integration with Bot
+
+The bot-openai.py file has been updated to:
+- Get the level ID from the client
+- Use the appropriate level configuration
+- Initialize Weave with the level-specific project name
+- Use level-specific messages, tools, and function handlers
+
+#### Project Structure
+
+```
+server/
+├── levels/
+│   ├── __init__.py
+│   ├── base.py
+│   ├── level0.py
+│   ├── level1.py
+│   └── README.md
+├── bot-openai.py
+└── Dockerfile
+```
+
+This modular approach allows for easy addition of new levels and customization of existing levels, with each level having its own unique configuration while sharing common infrastructure.
 
 
 ## PipeCat Cloud Integration
@@ -215,12 +259,13 @@ When a user successfully completes a challenge, the server includes a Weave trac
 - [x] Get the Pipecat deployment to signal the UI when the user succeeds in getting it to run authorize_bank_transfer
 - [x] Get the UI to respond and show a success state when Pipecat makes the success tool call
 - [x] Add a live link to the Weave project on user success. Test link
-- [ ] Figure out how to have independent Weave projects for each level. Set it up.
-- [ ] Figure out how to have multiple levels, with independently structured voice bots and independent Weave dashboards. Implement.
-- [ ] Decide how I should structure the challenges. Should they be the same task with multiple levels of difficulty, or should they be distinct tasks?
-- [ ] Deploy the UI & purchase + set up a custom domain
-- [ ] Fully outline the levels and their challenges
-- [ ] Implement level 1
+- [x] Figure out how to have independent Weave projects for each level. Set it up.
+- [x] Figure out how to have multiple levels, with independently structured voice bots and independent Weave dashboards. Implement.
+- [x] Decide how I should structure the challenges. Should they be the same task with multiple levels of difficulty, or should they be distinct tasks?
+- [x] Deploy the UI & purchase + set up a custom domain
+- [x] Fully outline the levels and their challenges
+- [x] Implement level 0 (easiest level - just ask nicely)
+- [x] Implement level 1 (password extraction)
 - [ ] Implement level 2
 - [ ] Implement level 3
 - [ ] Implement level 4
@@ -237,3 +282,14 @@ When a user successfully completes a challenge, the server includes a Weave trac
 - Damn. The server is sending a success response, but somehow the client is not picking it up. Why?
 - Fixed an issue where the challenge completion event was causing an infinite loop in the UI. Implemented a reference tracking mechanism to ensure the event is only processed once.
 - Updated the LevelScreen component to maintain the active call when showing the success state, allowing users to continue their conversation with the bot after completing a challenge.
+- Okay, I've decided that the different levels are actually going to be different aspects of difficulty for the same task. Everyone is going to try to authorize a bank transfer, but the bank transfer authorization will get increasingly difficult as the user progresses. 
+- However, I don't know how to structure the backend for this. Every challenge is going to have a distinct prompt, and they will also have probably distinct tools and sub-functions. Additionally, they need to be tracked to distinct Weave teams and projects.
+- This means the team name/entity name in the Weave.init call at the start of the program will need to change. 
+- Perhaps the bots.py file can stay the same. But I have a different agent file for each level?
+- Or maybe each agent file has its own language model, prompts definition, and tools definition, and then those get plugged into the same PipeCat agent and handler?
+- I should identify exactly the logic that does not change between levels. Keep that in the bot.py file and then break other parts into numbered agent files. E.g. agent_1.py, agent_2.py
+- Implemented a modular level configuration system with a base class and level-specific implementations. This allows each level to have its own Weave project, system prompts, tools, and function handlers.
+- Fixed client-side issues with level switching and challenge completion state management.
+- Updated the Dockerfile to include the levels directory for deployment.
+- Fixed provider order in AppContextProvider.tsx to ensure proper context access.
+- Added proper level progression in the UI with the "Next Level" button now correctly advancing to the next level.
