@@ -69,9 +69,9 @@ export function LevelScreen() {
       
       {showSuccess ? (
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="mb-6 text-green-500">
-            Challenge Completed!
-          </h1>
+          <h3 className="mb-6 text-green-500">
+            Level Completed!
+          </h3>
           
           <p className="mb-8">
             Congratulations! You successfully completed Level {currentLevelId}.
@@ -113,9 +113,9 @@ export function LevelScreen() {
         </div>
       ) : (
         <div className="max-w-2xl mx-auto">
-        <h1 className="mb-4 text-center">
+        <h3 className="mb-4 text-center">
           {currentLevel.title}
-        </h1>
+        </h3>
         
         <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -165,7 +165,7 @@ export function LevelScreen() {
           )}
         </div>
         
-        <div className="mt-8 text-center">
+        <div className="mt-3 text-center">
           <button
             onClick={() => setCurrentScreen('welcome')}
             className="button-secondary"
