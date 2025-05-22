@@ -155,3 +155,22 @@ p, span, button, input, select, textarea, a, li,
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Logo dark/light mode switching */
+.wb-logo-dark {
+  display: none;
+}
+
+.wb-logo-light {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .wb-logo-dark {
+    display: block;
+  }
+  
+  .wb-logo-light {
+    display: none;
+  }
+}

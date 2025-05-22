@@ -3,7 +3,7 @@
 import { WelcomeScreen } from '../components/WelcomeScreen';
 import { LevelScreen } from '../components/LevelScreen';
 import { SuccessScreen } from '../components/SuccessScreen';
-import { LevelSelector } from '../components/LevelSelector';
+import { Header } from '../components/Header';
 import { useLevelNavigation } from '../contexts/LevelNavigationContext';
 
 export default function Home() {
@@ -11,14 +11,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {currentScreen !== 'welcome' && <Header />}
+      
       {currentScreen === 'welcome' && <WelcomeScreen />}
       
-      {currentScreen === 'level' && (
-        <>
-          <LevelSelector />
-          <LevelScreen />
-        </>
-      )}
+      {currentScreen === 'level' && <LevelScreen />}
       
       {currentScreen === 'success' && <SuccessScreen />}
     </div>
