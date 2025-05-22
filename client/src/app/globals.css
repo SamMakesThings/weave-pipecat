@@ -10,8 +10,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,8 +20,87 @@
   }
 }
 
+/* Base font settings */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-source-sans, "Calibri"), sans-serif;
+  font-weight: 400; /* Regular weight as default for Source Sans */
+}
+
+/* Typography settings - Primary Font (Source Serif Pro) */
+h1, h2, h3, h4, h5, h6, .title, .headline {
+  font-family: var(--font-source-serif, "Times New Roman"), serif;
+  font-weight: 400; /* Regular weight as default for Source Serif */
+}
+
+/* Typography scale for headings */
+h1, .h1 {
+  font-size: 3.9rem; /* 62.4px */
+}
+
+h2, .h2 {
+  font-size: 3.3rem; /* 52.8px */
+}
+
+h3, .h3 {
+  font-size: 2.7rem; /* 43.2px */
+}
+
+h4, .h4 {
+  font-size: 2.25rem; /* 36px */
+}
+
+h5, .h5 {
+  font-size: 1.8rem; /* 28.8px */
+}
+
+h6, .h6 {
+  font-size: 1.5rem; /* 24px */
+}
+
+/* Base font size for body text */
+body {
+  font-size: 1.35rem; /* 21.6px base font size */
+}
+
+/* Typography settings - Secondary Font (Source Sans Pro) */
+p, span, button, input, select, textarea, a, li, 
+.body-text, .caption, .label, .button-text, .ui-element {
+  font-family: var(--font-source-sans, "Calibri"), sans-serif;
+  font-weight: 400; /* Regular weight as default for Source Sans */
+}
+
+/* Special case for small UI elements that should use all caps */
+.ui-small, .chart-label, .nav-item {
+  font-family: var(--font-source-sans, "Calibri"), sans-serif;
+  text-transform: uppercase;
+  font-size: 1.05rem; /* 16.8px */
+  letter-spacing: 0.05em;
+}
+
+/* Utility classes for specific font applications */
+.font-primary {
+  font-family: var(--font-source-serif, "Times New Roman"), serif;
+}
+
+.font-secondary {
+  font-family: var(--font-source-sans, "Calibri"), sans-serif;
+}
+
+/* Font weight utility classes */
+.font-regular {
+  font-weight: 400 !important;
+}
+
+.font-medium {
+  font-weight: 500 !important;
+}
+
+.font-semibold, .semi-bold {
+  font-weight: 600 !important; /* Semi-Bold for emphasis and legibility */
+}
+
+.font-bold {
+  font-weight: 700 !important;
 }
