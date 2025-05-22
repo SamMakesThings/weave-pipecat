@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useLevelNavigation } from '../contexts/LevelNavigationContext';
+import { useLevelNavigation, LevelId } from '../contexts/LevelNavigationContext';
 import { useLevelProgress } from '../contexts/LevelProgressContext';
 
 export function Header() {
@@ -25,13 +25,11 @@ export function Header() {
   }, []);
 
   const handleLevelSelect = (levelId: number) => {
-    if (isLevelUnlocked(levelId as any)) {
-      setCurrentLevelId(levelId as any);
+    if (isLevelUnlocked(levelId as LevelId)) {
+      setCurrentLevelId(levelId as LevelId);
       setIsDropdownOpen(false);
     }
   };
-
-  const currentLevel = levels[currentLevelId];
 
   return (
     <header className="sticky top-0 z-10 bg-[var(--background)] border-b border-gray-200 dark:border-gray-800 px-4 py-0 flex justify-between items-center">
