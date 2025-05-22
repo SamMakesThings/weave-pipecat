@@ -18,6 +18,17 @@ export function LevelScreen() {
   // Use a ref to track if we've already processed this challenge completion
   const hasProcessedChallenge = useRef(false);
 
+  const getCallButtonText = () => {
+    switch (status) {
+      case 'connecting':
+        return 'Connecting...';
+      case 'waiting_for_agent':
+        return 'Waiting for agent...';
+      default:
+        return 'Call Agent';
+    }
+  };
+
   // Handle challenge completion
   useEffect(() => {
     if (challengeCompleted && challengeData && !hasProcessedChallenge.current) {
@@ -143,14 +154,14 @@ export function LevelScreen() {
           ) : (
             <button
               onClick={startCall}
-              disabled={!isUnlocked || status === 'connecting'}
+              disabled={!isUnlocked || status === 'connecting' || status === 'waiting_for_agent'}
               className={`px-8 py-3 text-lg font-medium rounded-full 
                 ${!isUnlocked 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-[var(--accent)] text-black hover:opacity-90 transition-opacity'
                 }`}
             >
-              {status === 'connecting' ? 'Connecting...' : 'Call Agent'}
+              {getCallButtonText()}
             </button>
           )}
         </div>

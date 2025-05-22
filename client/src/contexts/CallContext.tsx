@@ -2,7 +2,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { useRTVIClient, useRTVIClientTransportState } from '@pipecat-ai/client-react';
 
 // Types
-export type CallStatus = 'idle' | 'connecting' | 'connected' | 'disconnecting' | 'error';
+export type CallStatus = 'idle' | 'connecting' | 'waiting_for_agent' | 'connected' | 'disconnecting' | 'error';
 
 interface ChallengeData {
   level: number;
@@ -57,6 +57,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
         callStatus = 'connecting';
         break;
       case 'connected':
+        callStatus = 'waiting_for_agent';
+        break;
       case 'ready':
         callStatus = 'connected';
         break;
@@ -74,7 +76,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setState(prev => ({
       ...prev,
       status: callStatus,
-      isCallActive: ['connected', 'ready'].includes(transportState),
+      isCallActive: transportState === 'ready', // Only active when fully ready
     }));
   }, [transportState, client]);
 
