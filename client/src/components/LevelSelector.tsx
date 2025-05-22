@@ -20,15 +20,16 @@ export function LevelSelector() {
             onClick={() => isUnlocked && setCurrentLevelId(level.id)}
             disabled={!isUnlocked}
             className={`
-              px-4 py-2 rounded-full font-medium transition-colors
+              button-secondary
               ${isCurrent ? 'ring-2 ring-[var(--accent)]' : ''}
-              ${isCompleted 
-                ? 'bg-green-500 text-white' 
-                : isUnlocked 
-                  ? 'bg-[var(--accent)] text-black hover:opacity-90' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }
             `}
+            style={
+              isCompleted 
+                ? { background: 'rgba(34, 197, 94, 0.9)', color: 'white' } 
+                : isUnlocked 
+                  ? { background: 'linear-gradient(270deg, #fc3 0, #ffad33 100%)', color: 'black' } 
+                  : { background: 'rgba(209, 213, 219, 0.9)', color: 'rgba(107, 114, 128, 0.9)', cursor: 'not-allowed', opacity: 0.7 }
+            }
           >
             Level {level.id}
           </button>

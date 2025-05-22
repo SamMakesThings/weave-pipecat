@@ -12,17 +12,17 @@ export function WelcomeScreen() {
           Can you hack a system by talking to it?
         </h1>
         
-        <p className="text-xl mb-8">
+        <p className="mb-8">
           Are you good at prompt injection? What about social engineering? Put your skills to the test with our Voice Agent Prompt Injection Challenge.
         </p>
         
-        <p className="text-lg mb-8">
+        <p className="mb-8">
           We have five different voice agents for you to talk to. You&apos;ll need to extract passwords, authorize bank transfers, negotiate impossible sales, and more. Are you ready?
         </p>
         
         <button
           onClick={() => setCurrentScreen('level')}
-          className="px-8 py-3 text-lg font-medium rounded-full bg-[var(--accent)] text-black hover:opacity-90 transition-opacity"
+          className="button-primary"
         >
           Start Challenge
         </button>

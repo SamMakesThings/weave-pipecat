@@ -26,6 +26,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-source-sans, "Calibri"), sans-serif;
   font-weight: 400; /* Regular weight as default for Source Sans */
+  line-height: 1.2;
 }
 
 /* Typography settings - Primary Font (Source Serif Pro) */
@@ -36,7 +37,7 @@ h1, h2, h3, h4, h5, h6, .title, .headline {
 
 /* Typography scale for headings */
 h1, .h1 {
-  font-size: 3.9rem; /* 62.4px */
+  font-size: 3.8rem; /* 62.4px */
   line-height: 1;
 }
 
@@ -104,4 +105,53 @@ p, span, button, input, select, textarea, a, li,
 
 .font-bold {
   font-weight: 700 !important;
+}
+
+/* Button Styles */
+.button-large {
+  height: 60px;
+}
+
+.button-primary, .button-secondary {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 25px;
+  gap: 10px;
+  height: 50px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 16px;
+  text-transform: uppercase; /* Ensure buttons are always capitalized */
+  font-weight: 600; /* Semi-bold for buttons */
+  transition: opacity 0.2s ease;
+  line-height: 1;
+}
+
+.button-primary {
+  background: linear-gradient(270deg, #fc3 0, #ffad33 100%);
+  color: black;
+}
+
+.button-primary:hover {
+  opacity: 0.9;
+}
+
+.button-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.button-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Disabled state for both button types */
+.button-primary:disabled, .button-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

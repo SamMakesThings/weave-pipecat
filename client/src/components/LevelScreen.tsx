@@ -69,22 +69,22 @@ export function LevelScreen() {
       
       {showSuccess ? (
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-6 text-green-500">
+          <h1 className="mb-6 text-green-500">
             Challenge Completed!
           </h1>
           
-          <p className="text-xl mb-8">
+          <p className="mb-8">
             Congratulations! You successfully completed Level {currentLevelId}.
           </p>
           
-          <p className="text-lg mb-8">
+          <p className="mb-8">
             Check out a transcript/recording of your conversation in the Weave dashboard! (or those of other winners)
           </p>
           
           <div className="flex flex-col md:flex-row justify-center gap-4">
             <button
               onClick={handleNextLevel}
-              className="px-8 py-3 text-lg font-medium rounded-full bg-[var(--accent)] text-black hover:opacity-90 transition-opacity"
+              className="button-primary"
             >
               {currentLevelId < 4 ? 'Next Level' : 'Finish Challenge'}
             </button>
@@ -94,7 +94,7 @@ export function LevelScreen() {
                 href={challengeData.weaveTraceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 text-lg font-medium rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                className="button-secondary"
               >
                 View Conversation in Weave
               </a>
@@ -103,7 +103,8 @@ export function LevelScreen() {
             {isCallActive && (
               <button
                 onClick={handleHangUp}
-                className="px-8 py-3 text-lg font-medium rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                className="button-secondary"
+                style={{ background: 'rgba(239, 68, 68, 0.9)', color: 'white' }}
               >
                 Hang Up
               </button>
@@ -112,7 +113,7 @@ export function LevelScreen() {
         </div>
       ) : (
         <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-center">
+        <h1 className="mb-4 text-center">
           {currentLevel.title}
         </h1>
         
@@ -127,7 +128,7 @@ export function LevelScreen() {
             </div>
             
             <div>
-              <p className="text-lg mb-4">
+              <p className="mb-4">
                 {currentLevel.description}
               </p>
               
@@ -146,7 +147,8 @@ export function LevelScreen() {
               <div className="w-4 h-4 rounded-full bg-red-500 animate-pulse mb-4"></div>
               <button
                 onClick={handleHangUp}
-                className="px-8 py-3 text-lg font-medium rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                className="button-secondary"
+                style={{ background: 'rgba(239, 68, 68, 0.9)', color: 'white' }}
               >
                 Hang Up
               </button>
@@ -155,11 +157,8 @@ export function LevelScreen() {
             <button
               onClick={startCall}
               disabled={!isUnlocked || status === 'connecting' || status === 'waiting_for_agent'}
-              className={`px-8 py-3 text-lg font-medium rounded-full 
-                ${!isUnlocked 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-[var(--accent)] text-black hover:opacity-90 transition-opacity'
-                }`}
+              className={!isUnlocked ? 'button-secondary' : 'button-primary'}
+              style={!isUnlocked ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             >
               {getCallButtonText()}
             </button>
@@ -169,7 +168,8 @@ export function LevelScreen() {
         <div className="mt-8 text-center">
           <button
             onClick={() => setCurrentScreen('welcome')}
-            className="text-blue-500 hover:underline"
+            className="button-secondary"
+            style={{ background: 'transparent', border: 'none', color: 'var(--foreground)' }}
           >
             Back to Welcome
           </button>
