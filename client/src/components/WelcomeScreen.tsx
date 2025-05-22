@@ -8,8 +8,8 @@ export function WelcomeScreen() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <div className="max-w-2xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-6">
-          Voice Agent Prompt Injection Challenge
+        <h1 className="mb-6">
+          Can you hack a system by talking to it?
         </h1>
         
         <p className="text-xl mb-8">
